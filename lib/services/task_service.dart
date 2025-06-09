@@ -35,6 +35,6 @@ class TaskService {
   }
 
   Future<Response> completeTask(int id) async {
-    return await _apiService.put('${ApiConstants.tasks}/$id/complete');
+    return await _apiService.put('${ApiConstants.tasks}/$id/toggle');
   }
 } 
