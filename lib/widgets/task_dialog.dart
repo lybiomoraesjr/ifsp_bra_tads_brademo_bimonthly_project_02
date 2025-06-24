@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/task_model.dart';
-import '../models/user_model.dart';
-import '../models/category_model.dart';
+import '../models/location_model.dart';
 
 class TaskDialog extends StatelessWidget {
   final Task? task;
@@ -12,24 +11,38 @@ class TaskDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final titleController = TextEditingController(text: task?.title);
-    final descriptionController = TextEditingController(
-      text: task?.description,
+    final descriptionController = TextEditingController(text: task?.description);
+    final dueDateController = TextEditingController(
+      text: task?.dueDate?.toIso8601String(),
+    );
+    final locationController = TextEditingController(
+      text: task?.location?.locationName,
     );
 
     return AlertDialog(
       title: Text(task == null ? 'Add Task' : 'Edit Task'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: titleController,
-            decoration: const InputDecoration(labelText: 'Title'),
-          ),
-          TextField(
-            controller: descriptionController,
-            decoration: const InputDecoration(labelText: 'Description'),
-          ),
-        ],
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(labelText: 'Title'),
+            ),
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(labelText: 'Description'),
+            ),
+            TextField(
+              controller: dueDateController,
+              decoration: const InputDecoration(labelText: 'Due Date (ISO format)'),
+            ),
+            TextField(
+              controller: locationController,
+              decoration: const InputDecoration(labelText: 'Location Name'),
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -43,9 +56,19 @@ class TaskDialog extends StatelessWidget {
               title: titleController.text,
               description: descriptionController.text,
               done: task?.done ?? false,
-              user: task?.user ?? User(id: 1, name: 'Default User'),
-              category:
-                  task?.category ?? Category(id: 1, name: 'Default Category'),
+              category: task?.category ?? 'Default Category',
+              createdAt: task?.createdAt ?? DateTime.now(),
+              dueDate: dueDateController.text.isNotEmpty
+                  ? DateTime.parse(dueDateController.text)
+                  : null,
+              location: locationController.text.isNotEmpty
+                  ? Location(
+                      latitude: task?.location?.latitude ?? 0.0,
+                      longitude: task?.location?.longitude ?? 0.0,
+                      locationName: locationController.text,
+                      locationDescription: task?.location?.locationDescription,
+                    )
+                  : null,
             );
 
             onSave(newTask);

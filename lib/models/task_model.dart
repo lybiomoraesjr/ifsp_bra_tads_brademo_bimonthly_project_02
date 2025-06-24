@@ -1,21 +1,24 @@
-import 'category_model.dart';
-import 'user_model.dart';
+import 'location_model.dart';
 
 class Task {
   final int id;
   final String title;
   final String description;
   final bool done;
-  final User user;
-  final Category category;
+  final String category;
+  final DateTime createdAt;
+  final DateTime? dueDate;
+  final Location? location;
 
   Task({
     required this.id,
     required this.title,
     required this.description,
     required this.done,
-    required this.user,
     required this.category,
+    required this.createdAt,
+    this.dueDate,
+    this.location,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
@@ -24,8 +27,10 @@ class Task {
       title: json['title'],
       description: json['description'],
       done: json['done'],
-      user: User.fromJson(json['user']),
-      category: Category.fromJson(json['category']),
+      category: json['category'],
+      createdAt: DateTime.parse(json['createdAt']),
+      dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : null,
+      location: json['location'] != null ? Location.fromJson(json['location']) : null,
     );
   }
 
@@ -34,7 +39,9 @@ class Task {
         'title': title,
         'description': description,
         'done': done,
-        'user': user.toJson(),
-        'category': category.toJson(),
+        'category': category,
+        'createdAt': createdAt.toIso8601String(),
+        'dueDate': dueDate?.toIso8601String(),
+        'location': location?.toJson(),
       };
 }
