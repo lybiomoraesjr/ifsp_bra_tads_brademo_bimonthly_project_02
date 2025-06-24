@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 import 'package:flutter_application_1/constants/route_names.dart';
-
-const String URL_API = 'https://teste.com/api/login'; // Altere para sua URL real
+import 'package:flutter_application_1/services/user_service.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -17,6 +14,7 @@ class _SignInPageState extends State<SignInPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _userService = UserService();
   bool _loading = false;
   String? _error;
 
@@ -27,25 +25,16 @@ class _SignInPageState extends State<SignInPage> {
     });
 
     try {
-      final response = await http.post(
-        Uri.parse(URL_API),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': _emailController.text.trim(),
-          'password': _passwordController.text,
-        }),
+      await _userService.login(
+        _emailController.text.trim(),
+        _passwordController.text,
       );
 
-      if (response.statusCode != 200) {
-        Navigator.pushReplacementNamed(context, RouteNames.home);
-      } else {
-        setState(() {
-          _error = 'Email ou senha inválidos';
-        });
-      }
+      // Login bem-sucedido, navegar para home
+      Navigator.pushReplacementNamed(context, RouteNames.home);
     } catch (e) {
       setState(() {
-        _error = 'Erro de conexão';
+        _error = e.toString().replaceFirst('Exception: ', '');
       });
     } finally {
       setState(() {
@@ -115,20 +104,22 @@ class _SignInPageState extends State<SignInPage> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _loading
-                        ? null
-                        : () {
-                            if (_formKey.currentState!.validate()) {
-                              _signIn();
-                            }
-                          },
-                    child: _loading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Entrar no App'),
+                    onPressed:
+                        _loading
+                            ? null
+                            : () {
+                              if (_formKey.currentState!.validate()) {
+                                _signIn();
+                              }
+                            },
+                    child:
+                        _loading
+                            ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : const Text('Entrar no App'),
                   ),
                 ),
                 TextButton(
