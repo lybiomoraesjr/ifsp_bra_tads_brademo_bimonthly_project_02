@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/task_model.dart';
-import '../models/user_model.dart';
-import '../models/category_model.dart';
+import '../widgets/task_dialog.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,54 +31,18 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _showTaskDialog({Task? task, int? index}) {
-    final titleController = TextEditingController(text: task?.title);
-    final descriptionController = TextEditingController(text: task?.description);
-
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text(task == null ? 'Add Task' : 'Edit Task'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
-              ),
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final newTask = Task(
-                  id: task?.id ?? DateTime.now().millisecondsSinceEpoch,
-                  title: titleController.text,
-                  description: descriptionController.text,
-                  done: task?.done ?? false,
-                  user: task?.user ?? User(id: 1, name: 'Default User'),
-                  category: task?.category ?? Category(id: 1, name: 'Default Category'),
-                );
-
-                if (task == null) {
-                  _addTask(newTask);
-                } else if (index != null) {
-                  _editTask(index, newTask);
-                }
-
-                Navigator.of(context).pop();
-              },
-              child: const Text('Save'),
-            ),
-          ],
+        return TaskDialog(
+          task: task,
+          onSave: (newTask) {
+            if (task == null) {
+              _addTask(newTask);
+            } else if (index != null) {
+              _editTask(index, newTask);
+            }
+          },
         );
       },
     );
