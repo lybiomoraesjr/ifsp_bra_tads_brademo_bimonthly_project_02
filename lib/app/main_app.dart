@@ -12,7 +12,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       title: 'ToDo Bem',
       theme: customTheme,
-      initialRoute: RouteNames.signIn,
+      initialRoute: RouteNames.home,
       onGenerateRoute: onGenerateRoute,
     );
   }

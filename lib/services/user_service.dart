@@ -20,7 +20,6 @@ class UserService {
 
       final userData = response.data;
 
-      // await _secureStorage.saveToken(userData['token']);
       await _secureStorage.saveUser(userData['user']);
 
       return userData;
