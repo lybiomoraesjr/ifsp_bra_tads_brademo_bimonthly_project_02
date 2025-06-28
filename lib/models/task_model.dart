@@ -44,4 +44,26 @@ class Task {
         'dueDate': dueDate?.toIso8601String(),
         'location': location?.toJson(),
       };
+
+  Task copyWith({
+    int? id,
+    String? title,
+    String? description,
+    bool? done,
+    String? category,
+    DateTime? createdAt,
+    DateTime? dueDate,
+    Location? location,
+  }) {
+    return Task(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      done: done ?? this.done,
+      category: category ?? this.category,
+      createdAt: createdAt ?? this.createdAt,
+      dueDate: dueDate ?? this.dueDate,
+      location: location ?? this.location,
+    );
+  }
 }

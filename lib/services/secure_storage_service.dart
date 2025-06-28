@@ -5,15 +5,11 @@ class SecureStorageService {
   static const _storage = FlutterSecureStorage();
 
   static const _userKey = 'user_data';
-  static const _tokenKey = 'auth_token';
+  static const _profileImageKey = 'profile_image_path';
 
   Future<void> saveUser(Map<String, dynamic> userData) async {
     final userJson = jsonEncode(userData);
     await _storage.write(key: _userKey, value: userJson);
-  }
-
-  Future<void> saveToken(String token) async {
-    await _storage.write(key: _tokenKey, value: token);
   }
 
   Future<Map<String, dynamic>?> getUser() async {
@@ -28,23 +24,32 @@ class SecureStorageService {
     }
   }
 
-  Future<String?> getToken() async {
-    return await _storage.read(key: _tokenKey);
-  }
-
   Future<bool> isLoggedIn() async {
-    final token = await getToken();
-    return token != null;
+    final user = await getUser();
+    return user != null;
   }
 
   Future<void> clearUserData() async {
     await Future.wait([
       _storage.delete(key: _userKey),
-      _storage.delete(key: _tokenKey),
+      _storage.delete(key: _profileImageKey),
     ]);
   }
 
   Future<void> updateUser(Map<String, dynamic> userData) async {
     await saveUser(userData);
+  }
+
+  // Métodos para gerenciar imagem do perfil
+  Future<void> saveProfileImagePath(String imagePath) async {
+    await _storage.write(key: _profileImageKey, value: imagePath);
+  }
+
+  Future<String?> getProfileImagePath() async {
+    return await _storage.read(key: _profileImageKey);
+  }
+
+  Future<void> clearProfileImage() async {
+    await _storage.delete(key: _profileImageKey);
   }
 }
