@@ -21,9 +21,9 @@ class Location {
   }
 
   Map<String, dynamic> toJson() => {
-        'latitude': latitude,
-        'longitude': longitude,
-        'locationName': locationName,
-        'locationDescription': locationDescription,
-      };
+    'latitude': latitude,
+    'longitude': longitude,
+    'locationName': locationName,
+    'locationDescription': locationDescription,
+  };
 }

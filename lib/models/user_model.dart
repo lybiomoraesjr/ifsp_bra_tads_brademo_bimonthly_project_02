@@ -6,24 +6,12 @@ class User {
   User({required this.id, required this.name, required this.email});
 
   factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'], 
-      name: json['name'],
-      email: json['email'] ?? '',
-    );
+    return User(id: json['id'], name: json['name'], email: json['email'] ?? '');
   }
 
-  Map<String, dynamic> toJson() => {
-    'id': id, 
-    'name': name,
-    'email': email,
-  };
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'email': email};
 
-  User copyWith({
-    int? id,
-    String? name,
-    String? email,
-  }) {
+  User copyWith({int? id, String? name, String? email}) {
     return User(
       id: id ?? this.id,
       name: name ?? this.name,

@@ -15,7 +15,7 @@ class _SignInPageState extends State<SignInPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _userService = UserService();
-  
+
   bool _loading = false;
   String? _error;
 
@@ -40,7 +40,6 @@ class _SignInPageState extends State<SignInPage> {
         _passwordController.text,
       );
 
-      // Login bem-sucedido, navegar para home
       if (mounted) {
         Navigator.pushReplacementNamed(context, RouteNames.home);
       }
@@ -74,7 +73,15 @@ class _SignInPageState extends State<SignInPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Logo/Ícone
+                Text(
+                  'To Do Bem',
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+                const SizedBox(height: 24),
+
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -88,8 +95,7 @@ class _SignInPageState extends State<SignInPage> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                
-                // Título
+
                 Text(
                   'Bem-vindo de volta!',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -100,13 +106,12 @@ class _SignInPageState extends State<SignInPage> {
                 const SizedBox(height: 8),
                 Text(
                   'Faça login para continuar',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 32),
-                
-                // Campo Email
+
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(
@@ -127,8 +132,7 @@ class _SignInPageState extends State<SignInPage> {
                   },
                 ),
                 const SizedBox(height: 16),
-                
-                // Campo Senha
+
                 TextFormField(
                   controller: _passwordController,
                   decoration: const InputDecoration(
@@ -148,8 +152,7 @@ class _SignInPageState extends State<SignInPage> {
                   },
                 ),
                 const SizedBox(height: 24),
-                
-                // Mensagem de erro
+
                 if (_error != null)
                   Container(
                     width: double.infinity,
@@ -161,7 +164,11 @@ class _SignInPageState extends State<SignInPage> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                        const Icon(
+                          Icons.error_outline,
+                          color: Colors.red,
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -173,8 +180,7 @@ class _SignInPageState extends State<SignInPage> {
                     ),
                   ),
                 const SizedBox(height: 24),
-                
-                // Botão de login
+
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -182,21 +188,24 @@ class _SignInPageState extends State<SignInPage> {
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: _loading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text(
-                            'Entrar',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                          ),
+                    child:
+                        _loading
+                            ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : const Text(
+                              'Entrar',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                   ),
                 ),
                 const SizedBox(height: 16),
-                
-                // Link para cadastro
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -205,7 +214,8 @@ class _SignInPageState extends State<SignInPage> {
                       style: TextStyle(color: Colors.grey[600]),
                     ),
                     TextButton(
-                      onPressed: () => Navigator.pushNamed(context, RouteNames.signUp),
+                      onPressed:
+                          () => Navigator.pushNamed(context, RouteNames.signUp),
                       child: const Text('Cadastre-se'),
                     ),
                   ],

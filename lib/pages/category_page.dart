@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/category_model.dart';
 import '../services/category_service.dart';
+import '../services/secure_storage_service.dart';
 
 class CategoryPage extends StatefulWidget {
   const CategoryPage({super.key});
@@ -11,9 +12,10 @@ class CategoryPage extends StatefulWidget {
 
 class _CategoryPageState extends State<CategoryPage> {
   final CategoryService _categoryService = CategoryService();
+  final SecureStorageService _secureStorage = SecureStorageService();
   final TextEditingController _nameController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  
+
   List<Category> _categories = [];
   bool _isLoading = false;
   bool _isSubmitting = false;
@@ -31,16 +33,32 @@ class _CategoryPageState extends State<CategoryPage> {
     super.dispose();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadCategories();
+  }
+
   Future<void> _loadCategories() async {
     setState(() => _isLoading = true);
     try {
-      final response = await _categoryService.getCategories();
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-        setState(() {
-          _categories = data.map((json) => Category.fromJson(json)).toList();
-        });
+      final user = await _secureStorage.getUser();
+      if (user == null) {
+        _showSnackBar('Usuário não autenticado');
+        return;
       }
+
+      final userId = user['id'] as int?;
+      if (userId == null) {
+        _showSnackBar('ID do usuário não encontrado');
+        return;
+      }
+
+      final List<Map<String, dynamic>> data = await _categoryService
+          .getCategories(userId: userId);
+      setState(() {
+        _categories = data.map((json) => Category.fromJson(json)).toList();
+      });
     } catch (e) {
       _showSnackBar('Erro ao carregar categorias: $e');
     } finally {
@@ -53,18 +71,34 @@ class _CategoryPageState extends State<CategoryPage> {
 
     setState(() => _isSubmitting = true);
     try {
-      final categoryData = {'name': _nameController.text.trim()};
-      
+      final user = await _secureStorage.getUser();
+      if (user == null) {
+        _showSnackBar('Usuário não autenticado');
+        return;
+      }
+
+      final userId = user['id'] as int?;
+      if (userId == null) {
+        _showSnackBar('ID do usuário não encontrado');
+        return;
+      }
+
+      final categoryData = {
+        'name': _nameController.text.trim(),
+        'userId': userId,
+      };
+
       if (_editingCategory != null) {
-        // Atualizar categoria existente
-        await _categoryService.updateCategory(_editingCategory!.id, categoryData);
+        await _categoryService.updateCategory(
+          _editingCategory!.id,
+          categoryData,
+        );
         _showSnackBar('Categoria atualizada com sucesso!');
       } else {
-        // Criar nova categoria
         await _categoryService.createCategory(categoryData);
         _showSnackBar('Categoria criada com sucesso!');
       }
-      
+
       _clearForm();
       _loadCategories();
     } catch (e) {
@@ -77,21 +111,24 @@ class _CategoryPageState extends State<CategoryPage> {
   Future<void> _deleteCategory(Category category) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirmar exclusão'),
-        content: Text('Tem certeza que deseja excluir a categoria "${category.name}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Confirmar exclusão'),
+            content: Text(
+              'Tem certeza que deseja excluir a categoria "${category.name}"?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Excluir'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Excluir'),
-          ),
-        ],
-      ),
     );
 
     if (confirmed == true) {
@@ -123,7 +160,8 @@ class _CategoryPageState extends State<CategoryPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: message.contains('sucesso') ? Colors.green : Colors.red,
+        backgroundColor:
+            message.contains('sucesso') ? Colors.green : Colors.red,
       ),
     );
   }
@@ -139,14 +177,13 @@ class _CategoryPageState extends State<CategoryPage> {
       ),
       body: Column(
         children: [
-          // Formulário de cadastro
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: Colors.grey.withValues(alpha: 0.1),
                   spreadRadius: 1,
                   blurRadius: 3,
                   offset: const Offset(0, 2),
@@ -159,7 +196,9 @@ class _CategoryPageState extends State<CategoryPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    _editingCategory != null ? 'Editar Categoria' : 'Nova Categoria',
+                    _editingCategory != null
+                        ? 'Editar Categoria'
+                        : 'Nova Categoria',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -192,16 +231,27 @@ class _CategoryPageState extends State<CategoryPage> {
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: _isSubmitting ? null : _saveCategory,
-                          icon: _isSubmitting
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : Icon(_editingCategory != null ? Icons.save : Icons.add),
-                          label: Text(_isSubmitting
-                              ? 'Salvando...'
-                              : _editingCategory != null ? 'Atualizar' : 'Adicionar'),
+                          icon:
+                              _isSubmitting
+                                  ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                  : Icon(
+                                    _editingCategory != null
+                                        ? Icons.save
+                                        : Icons.add,
+                                  ),
+                          label: Text(
+                            _isSubmitting
+                                ? 'Salvando...'
+                                : _editingCategory != null
+                                ? 'Atualizar'
+                                : 'Adicionar',
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Theme.of(context).primaryColor,
                             foregroundColor: Colors.white,
@@ -234,86 +284,88 @@ class _CategoryPageState extends State<CategoryPage> {
               ),
             ),
           ),
-          
-          // Lista de categorias
+
           Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _categories.isEmpty
+            child:
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _categories.isEmpty
                     ? const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.category_outlined,
-                              size: 64,
-                              color: Colors.grey,
-                            ),
-                            SizedBox(height: 16),
-                            Text(
-                              'Nenhuma categoria encontrada',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Adicione sua primeira categoria acima',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.category_outlined,
+                            size: 64,
+                            color: Colors.grey,
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'Nenhuma categoria encontrada',
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Adicione sua primeira categoria acima',
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    )
                     : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _categories.length,
-                        itemBuilder: (context, index) {
-                          final category = _categories[index];
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            elevation: 2,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: Theme.of(context).primaryColor,
-                                child: Text(
-                                  category.name[0].toUpperCase(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _categories.length,
+                      itemBuilder: (context, index) {
+                        final category = _categories[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Theme.of(context).primaryColor,
+                              child: Text(
+                                category.name[0].toUpperCase(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              title: Text(
-                                category.name,
-                                style: const TextStyle(fontWeight: FontWeight.w500),
-                              ),
-                              subtitle: Text('ID: ${category.id}'),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    onPressed: () => _editCategory(category),
-                                    icon: const Icon(Icons.edit, color: Colors.blue),
-                                    tooltip: 'Editar',
-                                  ),
-                                  IconButton(
-                                    onPressed: () => _deleteCategory(category),
-                                    icon: const Icon(Icons.delete, color: Colors.red),
-                                    tooltip: 'Excluir',
-                                  ),
-                                ],
+                            ),
+                            title: Text(
+                              category.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                          );
-                        },
-                      ),
+                            subtitle: Text('ID: ${category.id}'),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  onPressed: () => _editCategory(category),
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: Colors.blue,
+                                  ),
+                                  tooltip: 'Editar',
+                                ),
+                                IconButton(
+                                  onPressed: () => _deleteCategory(category),
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                  tooltip: 'Excluir',
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
           ),
         ],
       ),

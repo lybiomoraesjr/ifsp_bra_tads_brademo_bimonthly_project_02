@@ -5,20 +5,24 @@ class Task {
   final String title;
   final String description;
   final bool done;
-  final String category;
+  final int? categoryId;
+  final int userId;
   final DateTime createdAt;
   final DateTime? dueDate;
   final Location? location;
+  final int? reminderMinutes;
 
   Task({
     required this.id,
     required this.title,
     required this.description,
     required this.done,
-    required this.category,
+    this.categoryId,
+    required this.userId,
     required this.createdAt,
     this.dueDate,
     this.location,
+    this.reminderMinutes,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
@@ -27,43 +31,55 @@ class Task {
       title: json['title'],
       description: json['description'],
       done: json['done'],
-      category: json['category'],
+      categoryId: json['categoryId'] ?? null,
+      userId: json['userId'] ?? 0,
       createdAt: DateTime.parse(json['createdAt']),
-      dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : null,
-      location: json['location'] != null ? Location.fromJson(json['location']) : null,
+      dueDate:
+          json['dueDate'] != null && json['dueDate'].toString().isNotEmpty
+              ? DateTime.parse(json['dueDate'])
+              : null,
+      location:
+          json['location'] != null ? Location.fromJson(json['location']) : null,
+      reminderMinutes: json['reminderMinutes'] ?? null,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'description': description,
-        'done': done,
-        'category': category,
-        'createdAt': createdAt.toIso8601String(),
-        'dueDate': dueDate?.toIso8601String(),
-        'location': location?.toJson(),
-      };
+    'id': id,
+    'title': title,
+    'description': description,
+    'done': done,
+    'categoryId': categoryId,
+    'userId': userId,
+    'createdAt': createdAt.toIso8601String(),
+    'dueDate': dueDate?.toIso8601String(),
+    'location': location?.toJson(),
+    'reminderMinutes': reminderMinutes,
+  };
 
   Task copyWith({
     int? id,
     String? title,
     String? description,
     bool? done,
-    String? category,
+    int? categoryId,
+    int? userId,
     DateTime? createdAt,
     DateTime? dueDate,
     Location? location,
+    int? reminderMinutes,
   }) {
     return Task(
       id: id ?? this.id,
       title: title ?? this.title,
       description: description ?? this.description,
       done: done ?? this.done,
-      category: category ?? this.category,
+      categoryId: categoryId ?? this.categoryId,
+      userId: userId ?? this.userId,
       createdAt: createdAt ?? this.createdAt,
       dueDate: dueDate ?? this.dueDate,
       location: location ?? this.location,
+      reminderMinutes: reminderMinutes ?? this.reminderMinutes,
     );
   }
 }

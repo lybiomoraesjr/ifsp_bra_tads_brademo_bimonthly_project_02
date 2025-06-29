@@ -13,17 +13,22 @@ class UserService {
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
+      print('UserService: Fazendo login para email: $email');
       final response = await _apiService.post(
-        '${ApiConstants.users}/login',
+        ApiConstants.login,
         data: {'email': email, 'password': password},
       );
 
       final userData = response.data;
+      print('UserService: Resposta do login: $userData');
+      print('UserService: Token presente: ${userData['token'] != null}');
 
-      await _secureStorage.saveUser(userData['user']);
+      await _secureStorage.saveUser(userData);
+      print('UserService: Usuário salvo no storage');
 
       return userData;
     } on DioException catch (e) {
+      print('UserService: Erro no login: $e');
       throw _handleError(e);
     }
   }
@@ -31,13 +36,13 @@ class UserService {
   Future<Map<String, dynamic>> register(Map<String, dynamic> userData) async {
     try {
       final response = await _apiService.post(
-        '${ApiConstants.users}/register',
+        ApiConstants.register,
         data: userData,
       );
 
       final data = response.data;
 
-      await _secureStorage.saveUser(data['user']);
+      await _secureStorage.saveUser(data);
 
       return data;
     } on DioException catch (e) {
@@ -47,9 +52,10 @@ class UserService {
 
   Future<void> logout() async {
     try {
-      await _apiService.post('${ApiConstants.users}/logout');
-    } finally {
       await _secureStorage.clearUserData();
+    } catch (e) {
+      await _secureStorage.clearUserData();
+      rethrow;
     }
   }
 
@@ -90,6 +96,46 @@ class UserService {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getAllUsers() async {
+    try {
+      final response = await _apiService.get(ApiConstants.users);
+      return List<Map<String, dynamic>>.from(response.data);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteUser(int id) async {
+    try {
+      final response = await _apiService.delete('${ApiConstants.users}/$id');
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getUserCategories(int userId) async {
+    try {
+      final response = await _apiService.get(
+        '${ApiConstants.users}/$userId/categories',
+      );
+      return List<Map<String, dynamic>>.from(response.data);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getUserTasks(int userId) async {
+    try {
+      final response = await _apiService.get(
+        '${ApiConstants.users}/$userId/tasks',
+      );
+      return List<Map<String, dynamic>>.from(response.data);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   Exception _handleError(DioException error) {
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
@@ -101,16 +147,16 @@ class UserService {
         final message = error.response?.data['message'] ?? 'Erro desconhecido';
 
         switch (statusCode) {
+          case 400:
+            return Exception('Dados inválidos: $message');
           case 401:
-            return Exception(
-              'Não autorizado. Por favor, faça login novamente.',
-            );
-          case 403:
-            return Exception('Acesso negado.');
+            return Exception('Não autorizado: $message');
           case 404:
-            return Exception('Usuário não encontrado.');
+            return Exception('Usuário não encontrado: $message');
           case 409:
-            return Exception('Email já cadastrado.');
+            return Exception('Email já cadastrado: $message');
+          case 500:
+            return Exception('Erro interno do servidor: $message');
           default:
             return Exception('Erro na resposta do servidor: $message');
         }

@@ -16,7 +16,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _userService = UserService();
-  
+
   bool _loading = false;
   String? _error;
 
@@ -44,7 +44,6 @@ class _SignUpPageState extends State<SignUpPage> {
         'password': _passwordController.text,
       });
 
-      // Cadastro bem-sucedido, navegar para home
       if (mounted) {
         Navigator.pushReplacementNamed(context, RouteNames.home);
       }
@@ -78,7 +77,15 @@ class _SignUpPageState extends State<SignUpPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Logo/Ícone
+                Text(
+                  'To Do Bem',
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+                const SizedBox(height: 24),
+
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -92,8 +99,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                
-                // Título
+
                 Text(
                   'Criar Conta',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -104,13 +110,12 @@ class _SignUpPageState extends State<SignUpPage> {
                 const SizedBox(height: 8),
                 Text(
                   'Preencha os dados para se cadastrar',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 32),
-                
-                // Campo Nome
+
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(
@@ -130,8 +135,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   },
                 ),
                 const SizedBox(height: 16),
-                
-                // Campo Email
+
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(
@@ -152,8 +156,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   },
                 ),
                 const SizedBox(height: 16),
-                
-                // Campo Senha
+
                 TextFormField(
                   controller: _passwordController,
                   decoration: const InputDecoration(
@@ -173,8 +176,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   },
                 ),
                 const SizedBox(height: 16),
-                
-                // Campo Confirmar Senha
+
                 TextFormField(
                   controller: _confirmPasswordController,
                   decoration: const InputDecoration(
@@ -194,8 +196,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   },
                 ),
                 const SizedBox(height: 24),
-                
-                // Mensagem de erro
+
                 if (_error != null)
                   Container(
                     width: double.infinity,
@@ -207,7 +208,11 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                        const Icon(
+                          Icons.error_outline,
+                          color: Colors.red,
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -219,8 +224,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                 const SizedBox(height: 24),
-                
-                // Botão de cadastro
+
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -228,21 +232,24 @@ class _SignUpPageState extends State<SignUpPage> {
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: _loading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text(
-                            'Criar Conta',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                          ),
+                    child:
+                        _loading
+                            ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : const Text(
+                              'Criar Conta',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                   ),
                 ),
                 const SizedBox(height: 16),
-                
-                // Link para login
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

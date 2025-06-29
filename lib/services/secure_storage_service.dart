@@ -14,10 +14,16 @@ class SecureStorageService {
 
   Future<Map<String, dynamic>?> getUser() async {
     final userJson = await _storage.read(key: _userKey);
-    if (userJson == null) return null;
+    print('SecureStorageService: Dados do usuário em JSON: $userJson');
+    if (userJson == null) {
+      print('SecureStorageService: Nenhum usuário encontrado');
+      return null;
+    }
 
     try {
-      return jsonDecode(userJson) as Map<String, dynamic>;
+      final user = jsonDecode(userJson) as Map<String, dynamic>;
+      print('SecureStorageService: Usuário decodificado: $user');
+      return user;
     } catch (e) {
       print('Erro ao decodificar dados do usuário: $e');
       return null;
@@ -40,7 +46,6 @@ class SecureStorageService {
     await saveUser(userData);
   }
 
-  // Métodos para gerenciar imagem do perfil
   Future<void> saveProfileImagePath(String imagePath) async {
     await _storage.write(key: _profileImageKey, value: imagePath);
   }
