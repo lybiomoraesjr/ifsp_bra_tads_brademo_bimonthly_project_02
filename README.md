@@ -111,7 +111,7 @@ Aplicativo de lista de tarefas (To-Do List) integrado a uma API Web, desenvolvid
 - **Front-End (Flutter):**  
   [https://github.com/lybiomoraesjr/ifsp_bra_tads_brademo_bimonthly_project_02](https://github.com/lybiomoraesjr/ifsp_bra_tads_brademo_bimonthly_project_02)
 - **Back-End (Spring Boot):**  
-  [https://github.com/ArthurDeFaria/ifsp_bra_tads_bradwbk_bimonthly_project_02](https://github.com/ArthurDeFaria/ifsp_bra_tads_bradwbk_bimonthly_project_02)
+  [https://github.com/lybiomoraesjr/ifsp_bra_tads_bradwbk_bimonthly_project_02](https://github.com/lybiomoraesjr/ifsp_bra_tads_bradwbk_bimonthly_project_02)
 
 ---
 
