@@ -142,7 +142,7 @@ Aplicativo de lista de tarefas (To-Do List) integrado a uma API Web, desenvolvid
 ### Como rodar o back-end
 1. Clone o repositório do back-end:
    ```sh
-   git clone https://github.com/ArthurDeFaria/ifsp_bra_tads_bradwbk_bimonthly_project_02.git
+   git clone https://github.com/lybiomoraesjr/ifsp_bra_tads_bradwbk_bimonthly_project_02
    cd ifsp_bra_tads_bradwbk_bimonthly_project_02
    ```
 2. Configure o arquivo `.env` ou `application.properties` com as credenciais do banco (solicite ao grupo ou professor).
