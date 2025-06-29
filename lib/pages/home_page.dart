@@ -76,7 +76,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadTasks() async {
-    print('HomePage: _loadTasks chamado');
+    print('HomePage: _loadTasks iniciado');
     print('HomePage: _userId = $_userId');
 
     if (_userId == null) {
@@ -85,6 +85,13 @@ class _HomePageState extends State<HomePage> {
     }
 
     try {
+      final categoryMapping = <String, int>{};
+      for (final category in _categories) {
+        categoryMapping[category.name] = category.id;
+      }
+      Task.setCategoryMapping(categoryMapping);
+      print('HomePage: Mapeamento de categorias configurado: $categoryMapping');
+
       print(
         'HomePage: Fazendo requisição para carregar tarefas do usuário $_userId',
       );
@@ -98,6 +105,11 @@ class _HomePageState extends State<HomePage> {
       });
 
       print('HomePage: Tarefas carregadas no estado: ${_tasks.length}');
+      
+      for (int i = 0; i < _tasks.length; i++) {
+        final task = _tasks[i];
+        print('HomePage: Tarefa $i - "${task.title}" - categoryId: ${task.categoryId}');
+      }
     } catch (e) {
       print('HomePage: Erro ao carregar tarefas: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -264,14 +276,25 @@ class _HomePageState extends State<HomePage> {
   }
 
   List<Task> get _filteredTasks {
-    return _tasks.where((task) {
+    print('HomePage: _filteredTasks - Iniciando filtro');
+    print('HomePage: Total de tarefas: ${_tasks.length}');
+    print('HomePage: Categoria selecionada: ${_selectedCategory?.name} (ID: ${_selectedCategory?.id})');
+    print('HomePage: Query de busca: "$_searchQuery"');
+    
+    final filtered = _tasks.where((task) {
       final matchesName =
           _searchQuery.isEmpty ||
           task.title.toLowerCase().contains(_searchQuery.toLowerCase());
       final matchesCategory =
           _selectedCategory == null || task.categoryId == _selectedCategory!.id;
+      
+      print('HomePage: Tarefa "${task.title}" - categoryId: ${task.categoryId}, matchesName: $matchesName, matchesCategory: $matchesCategory');
+      
       return matchesName && matchesCategory;
     }).toList();
+    
+    print('HomePage: Tarefas filtradas: ${filtered.length}');
+    return filtered;
   }
 
   String _formatDueDate(DateTime dueDate) {

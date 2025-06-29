@@ -25,13 +25,33 @@ class Task {
     this.reminderMinutes,
   });
 
+  static Map<String, int> _categoryNameToId = {};
+
+  static void setCategoryMapping(Map<String, int> mapping) {
+    _categoryNameToId = mapping;
+  }
+
+  static int? _resolveCategoryId(dynamic category) {
+    if (category == null) return null;
+
+    if (category is int) {
+      return category;
+    } else if (category is String) {
+      return _categoryNameToId[category];
+    } else if (category is Map<String, dynamic>) {
+      return category['id'];
+    }
+
+    return null;
+  }
+
   factory Task.fromJson(Map<String, dynamic> json) {
     return Task(
       id: json['id'],
       title: json['title'],
       description: json['description'],
       done: json['done'],
-      categoryId: json['categoryId'] ?? null,
+      categoryId: _resolveCategoryId(json['category']),
       userId: json['userId'] ?? 0,
       createdAt: DateTime.parse(json['createdAt']),
       dueDate:
