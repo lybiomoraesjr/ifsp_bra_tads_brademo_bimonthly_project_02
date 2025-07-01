@@ -46,21 +46,28 @@ class Task {
   }
 
   factory Task.fromJson(Map<String, dynamic> json) {
+    int? categoryId;
+    if (json['category'] != null) {
+      if (json['category'] is int) {
+        categoryId = json['category'];
+      } else if (json['category'] is String) {
+        categoryId = null;
+      } else if (json['category'] is Map<String, dynamic>) {
+        categoryId = json['category']['id'];
+      }
+    }
+    
     return Task(
       id: json['id'],
-      title: json['title'],
-      description: json['description'],
-      done: json['done'],
-      categoryId: _resolveCategoryId(json['category']),
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      done: json['done'] ?? false,
+      categoryId: categoryId,
       userId: json['userId'] ?? 0,
       createdAt: DateTime.parse(json['createdAt']),
-      dueDate:
-          json['dueDate'] != null && json['dueDate'].toString().isNotEmpty
-              ? DateTime.parse(json['dueDate'])
-              : null,
-      location:
-          json['location'] != null ? Location.fromJson(json['location']) : null,
-      reminderMinutes: json['reminderMinutes'] ?? null,
+      dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : null,
+      location: json['location'] != null ? Location.fromJson(json['location']) : null,
+      reminderMinutes: json['reminderMinutes'],
     );
   }
 
