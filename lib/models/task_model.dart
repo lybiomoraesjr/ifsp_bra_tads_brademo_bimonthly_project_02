@@ -51,7 +51,7 @@ class Task {
       if (json['category'] is int) {
         categoryId = json['category'];
       } else if (json['category'] is String) {
-        categoryId = null;
+        categoryId = _resolveCategoryId(json['category']);
       } else if (json['category'] is Map<String, dynamic>) {
         categoryId = json['category']['id'];
       }
@@ -83,6 +83,17 @@ class Task {
     'location': location?.toJson(),
     'reminderMinutes': reminderMinutes,
   };
+
+  Map<String, dynamic> toRequestJson() {
+    return {
+      'title': title,
+      'description': description,
+      'userId': userId,
+      'categoryId': categoryId,
+      'dueDate': dueDate != null ? dueDate!.toIso8601String().split('T')[0] : null,
+      'location': location != null ? location!.toJson() : null,
+    };
+  }
 
   Task copyWith({
     int? id,
